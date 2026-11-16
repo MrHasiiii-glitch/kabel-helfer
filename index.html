@@ -1,0 +1,239 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Kabel-Helfer</title>
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icon.svg" type="image/svg+xml">
+<meta name="theme-color" content="#e20074">
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--ink:#14181f;--mute:#5b6472;--line:#dfe3ea;--acc:#e20074;--acc-ink:#fff;--ok:#0a7d3b;--okbg:#e6f6ec;--warn:#8a5a00;--warnbg:#fff4d6;--sel:#fdeaf4}
+@media (prefers-color-scheme:dark){:root{--bg:#0f1217;--card:#181d25;--ink:#eef1f6;--mute:#9aa4b2;--line:#2a313c;--acc:#ff4fa8;--acc-ink:#1a0010;--ok:#5fd68c;--okbg:#10281a;--warn:#f2c66b;--warnbg:#2c2410;--sel:#2a1523}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 system-ui,Segoe UI,Roboto,sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:16px}
+h1{font-size:1.4rem;margin:8px 0 2px}
+.sub{color:var(--mute);margin:0 0 12px}
+nav{display:flex;gap:6px;flex-wrap:wrap;margin:12px 0 16px;position:sticky;top:0;background:var(--bg);padding:8px 0;z-index:5}
+nav button{flex:1;min-width:90px;padding:10px;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:10px;font:inherit;cursor:pointer}
+nav button.on{background:var(--acc);color:var(--acc-ink);border-color:var(--acc);font-weight:600}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:14px}
+h2{font-size:1.05rem;margin:0 0 4px}
+.hint{color:var(--mute);font-size:.9rem;margin:0 0 10px}
+.opts{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:8px}
+.opt{border:2px solid var(--line);border-radius:12px;padding:10px;cursor:pointer;background:var(--card);text-align:left;color:var(--ink);font:inherit}
+.opt b{display:block}.opt span{font-size:.85rem;color:var(--mute)}
+.opt.on{border-color:var(--acc);background:var(--sel)}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:end}
+label{display:block;font-size:.85rem;color:var(--mute);margin-bottom:3px}
+input,select{padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--card);color:var(--ink);font:inherit;width:100%}
+.f{flex:1;min-width:120px}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+.seg button{padding:10px 14px;border:0;background:var(--card);color:var(--ink);font:inherit;cursor:pointer}
+.seg button.on{background:var(--acc);color:var(--acc-ink);font-weight:600}
+.res{border:2px solid var(--ok);background:var(--okbg);border-radius:14px;padding:14px;margin-bottom:14px}
+.res.bad{border-color:var(--warn);background:var(--warnbg)}
+.big{font-size:1.6rem;font-weight:700;margin:2px 0}
+.nr{display:inline-block;background:var(--acc);color:var(--acc-ink);border-radius:8px;padding:0 10px;margin-right:6px}
+.kv{display:grid;grid-template-columns:auto 1fr;gap:2px 12px;margin:8px 0;font-size:.95rem}
+.kv dt{color:var(--mute)}.kv dd{margin:0}
+ul{margin:6px 0;padding-left:20px}li{margin:3px 0}
+.w{color:var(--warn);font-weight:600}
+.btn{padding:9px 14px;border:1px solid var(--acc);background:var(--acc);color:var(--acc-ink);border-radius:10px;font:inherit;cursor:pointer;font-weight:600}
+.btn.ghost{background:transparent;color:var(--acc)}
+.small{font-size:.85rem;color:var(--mute)}
+table{width:100%;border-collapse:collapse}
+td,th{padding:8px;border-bottom:1px solid var(--line);text-align:left;vertical-align:top}
+th{font-size:.8rem;color:var(--mute);font-weight:600}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.chip{padding:5px 11px;border:1px solid var(--line);border-radius:99px;background:var(--card);color:var(--ink);cursor:pointer;font:inherit;font-size:.9rem}
+.chip.on{background:var(--acc);color:var(--acc-ink);border-color:var(--acc)}
+details{border-top:1px solid var(--line);padding:8px 0}summary{cursor:pointer;font-weight:600}
+.dis{font-size:.82rem;color:var(--mute);border-top:1px solid var(--line);margin-top:20px;padding-top:10px}
+.hide{display:none}
+code{background:var(--bg);padding:1px 5px;border-radius:5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>⚡ Kabel-Helfer</h1>
+  <p class="sub">Für Mobilfunk-Systemtechnik (DFMG / Telekom). Sagt dir, welche Kabel-Nr. aus deiner Kabeltabelle passt.</p>
+  <nav id="nav">
+    <button data-t="wiz" class="on">Assistent</button>
+    <button data-t="tab">Kabeltabelle</button>
+    <button data-t="lex">Lexikon</button>
+    <button data-t="mz">Merkzettel <span id="mzc"></span></button>
+  </nav>
+
+  <section id="t-wiz"></section>
+  <section id="t-tab" class="hide"></section>
+  <section id="t-lex" class="hide"></section>
+  <section id="t-mz" class="hide"></section>
+
+  <p class="dis">Planungshilfe mit vereinfachten, bewusst vorsichtigen Werten. Sie ersetzt keine Prüfung. Anschließen, Absichern und Messen darf nur eine Elektrofachkraft. Vorgaben von DFMG / Telekom und die Projektunterlagen gehen immer vor.</p>
+</div>
+<script src="logic.js"></script>
+<script>
+const K = KH;
+const $ = s => document.querySelector(s);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmt = (n, d = 1) => Number(n).toLocaleString('de-DE', { maximumFractionDigits: d });
+
+let S = { mode: 'strom', ort: 'innen', art: 'ac1', einheit: 'A', wert: 16, laenge: 20, drop: 3, vdc: 48, sigOrt: 'innen', paare: 4 };
+let MZ = [];
+try { MZ = JSON.parse(localStorage.getItem('kh-mz') || '[]'); } catch (e) {}
+const saveMZ = () => { try { localStorage.setItem('kh-mz', JSON.stringify(MZ)); } catch (e) {} };
+
+/* ---------- Navigation ---------- */
+document.querySelectorAll('#nav button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#nav button').forEach(x => x.classList.toggle('on', x === b));
+  ['wiz', 'tab', 'lex', 'mz'].forEach(t => $('#t-' + t).classList.toggle('hide', t !== b.dataset.t));
+});
+
+/* ---------- Assistent ---------- */
+const ORTE = [
+  ['innen', 'Innen, fest verlegt', 'Wand, Decke, Kabelkanal, Technikraum'],
+  ['schrank', 'Im Schaltschrank / Verteiler', 'Einzeladern innerhalb des Schranks'],
+  ['erde', 'Im Erdreich', 'Graben, Kabelschutzrohr im Boden'],
+  ['frei', 'Außen frei', 'Mast, Kabelpritsche, Fassade'],
+  ['beweglich', 'Beweglich / Baustrom', 'Provisorium, Generator, Verlängerung']
+];
+const ARTEN = [
+  ['ac1', '230 V (1 Phase)', 'normaler Steckdosen-Strom'],
+  ['ac3', '400 V Drehstrom', 'große Verbraucher, 5 Adern'],
+  ['dc', 'Gleichstrom', 'z. B. -48 V Anlage']
+];
+const opt = (key, val, t, d) => `<button class="opt ${S[key] === val ? 'on' : ''}" data-k="${key}" data-v="${val}"><b>${t}</b><span>${d}</span></button>`;
+
+function renderWiz() {
+  const strom = S.mode === 'strom';
+  let h = `<div class="card"><h2>1. Was willst du verlegen?</h2><div class="opts">
+    ${opt('mode', 'strom', 'Strom', 'Kabel zu einem Gerät / Verbraucher')}
+    ${opt('mode', 'signal', 'Signal / Alarm / Telefon', 'kein Strom, nur Daten und Meldungen')}</div></div>`;
+  if (strom) {
+    h += `<div class="card"><h2>2. Wo wird es verlegt?</h2><div class="opts">${ORTE.map(o => opt('ort', ...o)).join('')}</div></div>
+    <div class="card"><h2>3. Welche Stromart?</h2><p class="hint">Steht auf dem Typenschild des Geräts oder im Datenblatt (V = Volt).</p><div class="opts">${ARTEN.map(o => opt('art', ...o)).join('')}</div></div>
+    <div class="card"><h2>4. Wie viel Strom und wie lang?</h2><p class="hint">Typenschild: Angabe in <b>A</b> (Ampere) oder <b>W / kW</b> (Leistung). Länge = einfache Strecke von der Quelle bis zum Gerät.</p>
+      <div class="row">
+        <div><label>Angabe in</label><div class="seg"><button data-e="A" class="${S.einheit === 'A' ? 'on' : ''}">Ampere</button><button data-e="kW" class="${S.einheit === 'kW' ? 'on' : ''}">kW</button></div></div>
+        <div class="f"><label>${S.einheit === 'A' ? 'Strom (A)' : 'Leistung (kW)'}</label><input id="i-wert" type="number" min="0" step="any" value="${S.wert}"></div>
+        <div class="f"><label>Länge (m)</label><input id="i-len" type="number" min="0" step="any" value="${S.laenge}"></div>
+      </div>
+      <details><summary>Erweitert</summary><div class="row" style="margin-top:8px">
+        <div class="f"><label>Max. Spannungsverlust (%)</label><input id="i-drop" type="number" min="0.5" step="0.5" value="${S.drop}"></div>
+        <div class="f ${S.art === 'dc' ? '' : 'hide'}"><label>Gleichspannung (V)</label><input id="i-vdc" type="number" min="1" step="any" value="${S.vdc}"></div></div>
+        <p class="small">Spannungsverlust = wie viel Spannung unterwegs im Kabel verloren geht. Je länger und dünner das Kabel, desto mehr. 3 % ist ein üblicher Richtwert.</p></details></div>`;
+  } else {
+    h += `<div class="card"><h2>2. Wo wird es verlegt?</h2><div class="opts">
+      ${opt('sigOrt', 'innen', 'Innen', 'Gebäude, Technikraum, Schrank')}${opt('sigOrt', 'aussen', 'Außen / im Erdreich', 'Mast, Graben, Freileitung')}</div></div>
+      <div class="card"><h2>3. Wie viele Paare?</h2><p class="hint">Ein Paar = 2 Adern, also 1 Signal. Alarmkontakt = meist 1 Paar. Plane Reserve mit ein.</p>
+      <div class="f" style="max-width:200px"><label>Paare</label><input id="i-paare" type="number" min="1" step="1" value="${S.paare}"></div></div>`;
+  }
+  h += '<div id="result"></div>';
+  $('#t-wiz').innerHTML = h;
+  $('#t-wiz').querySelectorAll('.opt').forEach(b => b.onclick = () => { S[b.dataset.k] = b.dataset.v; if (b.dataset.k === 'art' && b.dataset.v === 'dc') S.einheit = S.einheit; renderWiz(); });
+  $('#t-wiz').querySelectorAll('[data-e]').forEach(b => b.onclick = () => { S.einheit = b.dataset.e; S.wert = S.einheit === 'kW' ? 3 : 16; renderWiz(); });
+  const bind = (id, key) => { const el = $(id); if (el) el.oninput = () => { S[key] = parseFloat(el.value); renderResult(); }; };
+  bind('#i-wert', 'wert'); bind('#i-len', 'laenge'); bind('#i-drop', 'drop'); bind('#i-vdc', 'vdc'); bind('#i-paare', 'paare');
+  renderResult();
+}
+
+function renderResult() {
+  const r = S.mode === 'strom' ? K.empfehleStrom(S) : K.empfehleSignal(S);
+  let h;
+  if (!r.ok) {
+    h = `<div class="res bad"><b>Keine Empfehlung</b><p>${esc(r.msg || '')}</p></div>`;
+  } else {
+    const c = r.rec, f = K.FAM[c.fam];
+    h = `<div class="res"><div class="small">Empfehlung</div>
+      <div class="big"><span class="nr">Nr. ${c.nr}</span> ${c.anzahl > 1 ? c.anzahl + ' × ' : ''}${esc(c.typ)}</div>
+      <div>${esc(f.kurz)}</div>
+      <dl class="kv">
+        ${S.mode === 'strom' ? `<dt>Dein Strom</dt><dd>ca. ${fmt(r.I)} A</dd>
+        <dt>Sicherung bis max.</dt><dd>${r.In} A (Sicherungsautomat)</dd>
+        <dt>Kabel verträgt</dt><dd>ca. ${c.izv} A Dauerstrom</dd>
+        <dt>Spannungsverlust</dt><dd>${fmt(c.drop)} % (erlaubt ${S.drop} %)</dd>` : `<dt>Paare</dt><dd>${c.paare} (gewünscht ${S.paare})</dd>`}
+        <dt>Wofür gedacht</dt><dd>${esc(f.use)}</dd>
+        <dt>Nicht für</dt><dd>${esc(f.not)}</dd>
+        ${r.farben ? `<dt>Adernfarben</dt><dd>${esc(r.farben)}</dd>` : ''}
+      </dl>
+      ${r.warumNicht ? `<p class="small">Warum nicht kleiner? ${esc(r.warumNicht)}</p>` : ''}
+      ${r.warn.map(w => `<p class="w">⚠ ${esc(w)}</p>`).join('')}
+      ${r.notes.length ? '<ul>' + r.notes.map(n => `<li>${esc(n)}</li>`).join('') + '</ul>' : ''}
+      ${r.alt && r.alt.length ? `<p class="small"><b>Größere Alternativen:</b> ${r.alt.map(a => `Nr. ${a.nr} ${esc(a.typ)}`).join(' · ')}</p>` : ''}
+      <button class="btn" id="add">+ Merkzettel</button></div>`;
+  }
+  $('#result').innerHTML = h;
+  const add = $('#add'); if (add) add.onclick = () => { addMZ(r.rec.nr, r.rec.anzahl, S.mode === 'strom' ? S.laenge : 0); add.textContent = '✓ drauf'; };
+}
+
+/* ---------- Kabeltabelle ---------- */
+let filt = 'ALLE', q = '';
+function renderTab() {
+  const fams = ['ALLE', ...Object.keys(K.FAM).filter(k => K.T.some(c => c.fam === k))];
+  const rows = K.T.filter(c => (filt === 'ALLE' || c.fam === filt) && (c.nr + ' ' + c.typ).toLowerCase().includes(q.toLowerCase()));
+  $('#t-tab').innerHTML = `<div class="card"><h2>Deine Kabeltabelle</h2><p class="hint">Alle Kabel mit Nr., in Klartext. Antippen für Erklärung.</p>
+    <input id="q" placeholder="Suchen: Nr. oder Typ, z. B. 5x16 oder 29" value="${esc(q)}">
+    <div class="chips">${fams.map(k => `<button class="chip ${filt === k ? 'on' : ''}" data-f="${k}">${k === 'ALLE' ? 'Alle' : esc(K.FAM[k].name)}</button>`).join('')}</div>
+    <table><tr><th>Nr.</th><th>Typ</th><th>Art</th><th></th></tr>${rows.map(c => `<tr><td><b>${c.nr}</b></td><td>${esc(c.typ)}</td><td class="small">${esc(K.FAM[c.fam].kurz)}</td><td><button class="chip" data-add="${c.nr}">+</button></td></tr>
+      <tr data-d="${c.nr}" class="hide"><td colspan="4" class="small"><b>Wofür:</b> ${esc(K.FAM[c.fam].use)}<br><b>Nicht für:</b> ${esc(K.FAM[c.fam].not)}${K.NOTE[c.nr] ? `<br><span class="w">⚠ ${esc(K.NOTE[c.nr])}</span>` : ''}</td></tr>`).join('')}</table></div>`;
+  $('#q').oninput = e => { q = e.target.value; const p = e.target.selectionStart; renderTab(); const n = $('#q'); n.focus(); n.setSelectionRange(p, p); };
+  $('#t-tab').querySelectorAll('[data-f]').forEach(b => b.onclick = () => { filt = b.dataset.f; renderTab(); });
+  $('#t-tab').querySelectorAll('[data-add]').forEach(b => b.onclick = e => { e.stopPropagation(); addMZ(+b.dataset.add, 1, 0); b.textContent = '✓'; });
+  $('#t-tab').querySelectorAll('tr:not([data-d])').forEach(tr => { const n = tr.querySelector('b'); if (n && !tr.querySelector('th')) tr.onclick = () => { const d = $('#t-tab [data-d="' + n.textContent + '"]'); d.classList.toggle('hide'); }; });
+}
+
+/* ---------- Lexikon ---------- */
+function renderLex() {
+  const basics = [
+    ['Volt (V)', 'Die „Kraft“, mit der Strom gedrückt wird. Steckdose = 230 V. Drehstrom = 400 V. Mobilfunk-Anlagen oft -48 V Gleichstrom.'],
+    ['Ampere (A)', 'Wie viel Strom fließt. Das bestimmt, wie dick das Kabel sein muss. Mehr Ampere = dickeres Kabel.'],
+    ['Watt (W) / Kilowatt (kW)', 'Leistung = Volt × Ampere. 1 kW = 1000 W. Wenn nur kW auf dem Typenschild steht, rechnet der Assistent in Ampere um.'],
+    ['Querschnitt (mm²)', 'Wie dick das Kupfer im Kabel ist. Die Zahl hinter dem „x“, z. B. 5x16 = 5 Adern mit je 16 mm². Dicker = mehr Strom, weniger Verlust, teurer.'],
+    ['Adernzahl', 'Die Zahl vor dem „x“. 3x = 3 Adern (L, N, PE). 5x = 5 Adern (L1, L2, L3, N, PE). 1x = nur eine Ader.'],
+    ['L, N, PE', 'L = Außenleiter (führt Strom, gefährlich). N = Neutralleiter. PE = Schutzleiter (Erdung, grün-gelb). PE niemals für etwas anderes benutzen.'],
+    ['Drehstrom (3 Phasen)', 'Drei Außenleiter L1, L2, L3 zusammen. Für größere Verbraucher, weil das Kabel dünner bleiben kann.'],
+    ['Sicherung / Automat', 'Schaltet bei zu viel Strom ab, damit das Kabel nicht heiß wird. Muss immer zum Kabel passen: Sicherung darf nie größer sein, als das Kabel verträgt.'],
+    ['Spannungsverlust', 'Auf langen oder dünnen Kabeln geht Spannung verloren. Am Ende kommt weniger an, Geräte laufen schlecht oder fallen aus. Deshalb längere Strecken = dickeres Kabel.'],
+    ['Einzelader-Kabel (1x)', 'Eine Ader pro Kabel. Du brauchst mehrere (z. B. 3 oder 5) und legst sie zusammen. Typisch für große Querschnitte und Gleichstrom.']
+  ];
+  const fams = Object.keys(K.FAM).filter(k => K.FAM[k].dec.length);
+  $('#t-lex').innerHTML = `<div class="card"><h2>Grundbegriffe</h2>${basics.map(b => `<details><summary>${b[0]}</summary><p>${b[1]}</p></details>`).join('')}</div>
+    <div class="card"><h2>Kabelnamen entschlüsseln</h2><p class="hint">Jeder Buchstabe im Kabelnamen hat eine Bedeutung.</p>${fams.map(k => { const f = K.FAM[k]; return `<details><summary>${esc(f.name)} · ${esc(f.kurz)}</summary><table>${f.dec.map(d => `<tr><td><b>${esc(d[0])}</b></td><td>${esc(d[1])}</td></tr>`).join('')}</table><p class="small">${esc(f.use)}</p></details>`; }).join('')}</div>
+    <div class="card"><h2>Merksätze</h2><ul>
+      <li><b>Innen = NYM-J, außen/Erde = NYY-J.</b> Das ist die Hauptregel.</li>
+      <li><b>Beweglich = H07RN-F</b> (Gummi, flexibel).</li>
+      <li><b>H07V…</b> nur im Schaltschrank oder Rohr.</li>
+      <li><b>Signal = JY(St)Y</b> innen, <b>A2YF(L)2Y</b> außen.</li>
+      <li>Strom und Signal immer räumlich trennen.</li>
+      <li>Im Zweifel ein Kabel dicker nehmen, nie dünner.</li></ul></div>`;
+}
+
+/* ---------- Merkzettel ---------- */
+function addMZ(nr, qty, len) {
+  const ex = MZ.find(x => x.nr === nr && x.len === len);
+  if (ex) ex.qty += qty; else MZ.push({ nr, qty, len });
+  saveMZ(); renderMZ();
+}
+function renderMZ() {
+  $('#mzc').textContent = MZ.length ? '(' + MZ.length + ')' : '';
+  $('#t-mz').innerHTML = `<div class="card"><h2>Merkzettel</h2><p class="hint">Deine Kabelliste für Bestellung oder Bericht. Wird im Browser gespeichert.</p>
+  ${MZ.length ? `<table><tr><th>Nr.</th><th>Typ</th><th>Anz.</th><th>Länge je Stück (m)</th><th></th></tr>${MZ.map((x, i) => `<tr><td><b>${x.nr}</b></td><td>${esc(K.BY_NR[x.nr].typ)}</td>
+    <td><input type="number" min="1" value="${x.qty}" data-q="${i}" style="width:70px"></td><td><input type="number" min="0" value="${x.len || ''}" data-l="${i}" style="width:90px"></td><td><button class="chip" data-x="${i}">✕</button></td></tr>`).join('')}</table>
+  <div class="row" style="margin-top:10px"><button class="btn" id="cp">Als Text kopieren</button><button class="btn ghost" id="cl">Leeren</button></div><p class="small" id="cpm"></p>` : '<p>Noch leer. Im Assistenten oder in der Tabelle auf „+“ tippen.</p>'}</div>`;
+  $('#t-mz').querySelectorAll('[data-q]').forEach(e => e.oninput = () => { MZ[+e.dataset.q].qty = Math.max(1, parseInt(e.value) || 1); saveMZ(); });
+  $('#t-mz').querySelectorAll('[data-l]').forEach(e => e.oninput = () => { MZ[+e.dataset.l].len = parseFloat(e.value) || 0; saveMZ(); });
+  $('#t-mz').querySelectorAll('[data-x]').forEach(e => e.onclick = () => { MZ.splice(+e.dataset.x, 1); saveMZ(); renderMZ(); });
+  const cp = $('#cp'); if (cp) cp.onclick = async () => {
+    const txt = MZ.map(x => `Nr. ${x.nr} – ${K.BY_NR[x.nr].typ} – ${x.qty} ×${x.len ? ' ' + x.len + ' m' : ''}`).join('\n');
+    try { await navigator.clipboard.writeText(txt); $('#cpm').textContent = 'Kopiert.'; } catch (e) { $('#cpm').textContent = 'Kopieren ging nicht, bitte markieren und von Hand kopieren.'; }
+  };
+  const cl = $('#cl'); if (cl) cl.onclick = () => { MZ = []; saveMZ(); renderMZ(); };
+}
+
+renderWiz(); renderTab(); renderLex(); renderMZ();
+if ('serviceWorker' in navigator && location.protocol.startsWith('http')) navigator.serviceWorker.register('sw.js').catch(() => {});
+</script>
+</body>
+</html>
